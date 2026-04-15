@@ -3,7 +3,7 @@ import { Drop } from '../drop/drop'
 export const toString = Object.prototype.toString
 const toLowerCase = String.prototype.toLowerCase
 
-export const hasOwnProperty = Object.hasOwnProperty
+export const hasOwnProperty = Object.prototype.hasOwnProperty
 
 export function isString (value: any): value is string {
   return typeof value === 'string'

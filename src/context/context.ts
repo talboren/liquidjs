@@ -135,7 +135,10 @@ export class Context {
   }
 }
 
+const dangerousKeys: Set<string | number> = new Set(['__proto__', 'prototype', 'constructor'])
+
 export function readJSProperty (obj: Scope, key: PropertyKey, ownPropertyOnly: boolean) {
+  if (dangerousKeys.has(key)) return undefined
   if (ownPropertyOnly && !hasOwnProperty.call(obj, key) && !(obj instanceof Drop)) return undefined
   return obj[key]
 }
