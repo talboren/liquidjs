@@ -1,9 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 
-const root = path.resolve(__dirname, '..')
-const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8').replace(/\r\n/g, '\n')
-
 function extractSection (text, beginMarker, endMarker) {
   const lines = text.split('\n')
   let inside = false
@@ -31,9 +28,21 @@ function transformFinancial (html) {
     .replace(/<\/tr>\s*<tr>/g, '')
 }
 
-const allContributors = transformContributors(extractSection(readme, 'ALL-CONTRIBUTORS-LIST:START', 'ALL-CONTRIBUTORS-LIST:END'))
-const financialContributors = transformFinancial(extractSection(readme, 'FINANCIAL-CONTRIBUTORS-BEGIN', 'FINANCIAL-CONTRIBUTORS-END'))
+function buildContributors (readmeContent) {
+  const text = readmeContent.replace(/\r\n/g, '\n')
+  return {
+    allContributors: transformContributors(extractSection(text, 'ALL-CONTRIBUTORS-LIST:START', 'ALL-CONTRIBUTORS-LIST:END')),
+    financialContributors: transformFinancial(extractSection(text, 'FINANCIAL-CONTRIBUTORS-BEGIN', 'FINANCIAL-CONTRIBUTORS-END'))
+  }
+}
 
-const outDir = path.join(root, 'docs/themes/navy/layout/partial')
-fs.writeFileSync(path.join(outDir, 'all-contributors.swig'), allContributors)
-fs.writeFileSync(path.join(outDir, 'financial-contributors.swig'), financialContributors)
+if (require.main === module) {
+  const root = path.resolve(__dirname, '..')
+  const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8')
+  const result = buildContributors(readme)
+  const outDir = path.join(root, 'docs/themes/navy/layout/partial')
+  fs.writeFileSync(path.join(outDir, 'all-contributors.swig'), result.allContributors)
+  fs.writeFileSync(path.join(outDir, 'financial-contributors.swig'), result.financialContributors)
+}
+
+module.exports = { extractSection, transformContributors, transformFinancial, buildContributors }
